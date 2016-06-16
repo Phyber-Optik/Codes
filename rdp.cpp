@@ -33,67 +33,102 @@ const ll INF = 200000000000000000;
 #define MAX             100007
 
 using namespace std;
-typedef vector<pii> List;
-typedef struct data{
-    List L;
-    data(List tmp){
-        L = tmp;
+void R1();
+void R2();
+void L();
+void L1();
+void S();
+void AN();
+
+int cur = 0;
+string str;
+void match(char t){
+    if(str[cur] == t){
+        cur++;
     }
-}CC;
-
-vector<CC> Cat;
-ll dp[26][1002];
-int T, C;
-ll L;
-ll F(int pre, int pre_pos, int cur, int cur_pos){
-    ll tot = Cat[cur].L[cur_pos].ss;
-    tot += abs(Cat[cur].L[cur_pos].ff - Cat[pre].L[pre_pos].ff);
-    return tot;
-}
-
-ll go(int id, int pre){
-    if(id >= C) return (L - Cat[id-1].L[pre].ff);
-    if(dp[id][pre] != -1) return dp[id][pre];
-
-    ll ret = INF;
-    //dbg(ret);
-    FORAB(i, 0, T){
-        //dbg(ret);
-        ret = min(ret, F(id - 1, pre, id, i) + go(id + 1, i));
+    else if(t == ')'){
+        printf("Right parenthesis match not found!");
     }
 
-    return dp[id][pre] = ret;
+    else if(t == ','){
+        printf("Comma not found!");
+    }
 }
 
+void Dig(){
+    if(str[cur] >= '0' && str[cur] <= '9'){
+        cur++;
+    }
+}
 
+void Let(){
+    if(str[cur] >= 'a' && str[cur] <= 'z'){
+        cur++;
+    }
+}
+
+void R1(){
+    int tmp = cur;
+    Dig();
+    cur = tmp;
+    Let();
+}
+
+void R2(){
+    R1();
+    AN();
+}
+
+void AN(){
+    dbg(str[cur]);
+    int tmp = cur;
+    Dig();
+    R2();
+
+    //backtrack, try the other rule
+    cur = tmp;
+    Let();
+    R2();
+
+}
+
+void L1(){
+    S();
+    match(',');
+}
+
+void L(){
+    S();
+    L1();
+}
+
+void S(){
+    int tmp = cur;
+    if(str[cur] == '('){
+        cur++;
+        L();
+        match(')');
+    }
+    else if(str[cur] == ')'){
+        match(')');
+    }
+    else{
+        cur = tmp;
+        AN();
+    }
+}
 
 int main(){
-    //read(in);
+    read(in);
     //write(out);
 	int tc, cs = 1;
-	ll a, b;
-	scan(tc);
-	while(tc--){
-        scanf("%d%d", &C, &T);
-        cin>>L;
-        FORAB(i, 0, C){
-            List tmp;
-            FORAB(j, 0, T){
-                cin>>a>>b;
-                tmp.pb(pii(a, b));
-            }
-            Cat.pb(data(tmp));
-        }
-
-        mem(dp, -1);
-        ll ans = INF;
-        FORAB(i, 0, T){
-            ans = min(ans, Cat[0].L[i].ff + Cat[0].L[i].ss + go(1, i));
-        }
-
-        cout<<ans<<endl;
-        Cat.clear();
-	}
-
+    cin>>str;
+    S();
+    if(str[cur] == '$'){
+        printf("String Accepted\n");
+    }
+    else{
+        printf("Not accepted\n");
+    }
     return 0;
 }

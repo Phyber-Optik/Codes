@@ -18,7 +18,7 @@ typedef long long ll;
 #define ss              second
 #define read(in)        freopen("in.txt", "r", stdin)
 #define write(out)      freopen("out.txt", "w", stdout)
-const ll INF = 200000000000000000;
+#define INF             1<<30
 #define eps             1e-9
 #define FORN(i, n)      for(int i = 0; i < n; i++)
 #define FORAB(i, x, n)  for(int i = x; i < n; i++)
@@ -28,72 +28,64 @@ const ll INF = 200000000000000000;
 #define tor             vector
 #define dbg(x)          cout<<#x<<" : "<<x<<endl
 #define chkwhere        cout<<"LOL\n"
-#define pii             pair<ll, ll>
+#define pii             pair<int, int>
 #define MOD             1000000007
 #define MAX             100007
 
 using namespace std;
-typedef vector<pii> List;
-typedef struct data{
-    List L;
-    data(List tmp){
-        L = tmp;
-    }
-}CC;
+vector<pii> G[MAX];
+int d[MAX];
 
-vector<CC> Cat;
-ll dp[26][1002];
-int T, C;
-ll L;
-ll F(int pre, int pre_pos, int cur, int cur_pos){
-    ll tot = Cat[cur].L[cur_pos].ss;
-    tot += abs(Cat[cur].L[cur_pos].ff - Cat[pre].L[pre_pos].ff);
-    return tot;
+void dijkstra(int src, int n){
+    int u, v, w, sz;
+    priority_queue< pii, vector<pii>, greater<pii> > Q;
+    FORAB(i, 0, n + 1) d[i] = INF;
+    d[src] = 0;
+    Q.push(pii(0, src));
+
+    while(!Q.empty()){
+        u = Q.top().second;
+        Q.pop();
+
+        sz = G[u].size();
+        FORAB(i, 0, sz){
+            v = G[u][i].ff;
+            w = G[u][i].ss;
+
+            if(d[v] > d[u] + w){
+                d[v] = d[u] + w;
+                Q.push(pii(d[v], v));
+            }
+        }
+    }
 }
 
-ll go(int id, int pre){
-    if(id >= C) return (L - Cat[id-1].L[pre].ff);
-    if(dp[id][pre] != -1) return dp[id][pre];
-
-    ll ret = INF;
-    //dbg(ret);
-    FORAB(i, 0, T){
-        //dbg(ret);
-        ret = min(ret, F(id - 1, pre, id, i) + go(id + 1, i));
-    }
-
-    return dp[id][pre] = ret;
+void clear(int n){
+    FORAB(i, 0, n + 1) G[i].clear();
 }
 
-
+int bin_search(int L, int R, int s,  int t, int p){
+    int mid = (L + R) >> 1;
+    while(L < R){
+        dijkstra()
+    }
+}
 
 int main(){
     //read(in);
     //write(out);
-	int tc, cs = 1;
-	ll a, b;
+	int tc, cs = 1, n, m, a, b, c, s, t, p, mx;
 	scan(tc);
 	while(tc--){
-        scanf("%d%d", &C, &T);
-        cin>>L;
-        FORAB(i, 0, C){
-            List tmp;
-            FORAB(j, 0, T){
-                cin>>a>>b;
-                tmp.pb(pii(a, b));
-            }
-            Cat.pb(data(tmp));
+        scanf("%d%d%d%d%d", &n, &m, &s, &t, &p);
+        FORAB(i, 0, m){
+            scanf("%d%d%d", &a, &b, &c);
+            G[a].pb(pii(b, c));
         }
 
-        mem(dp, -1);
-        ll ans = INF;
-        FORAB(i, 0, T){
-            ans = min(ans, Cat[0].L[i].ff + Cat[0].L[i].ss + go(1, i));
-        }
+		printf("Case %d: %d\n", cs++, bin_search(0, mx, s, t, p));
 
-        cout<<ans<<endl;
-        Cat.clear();
+        clear(n);
 	}
-
     return 0;
 }

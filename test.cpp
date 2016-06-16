@@ -1,72 +1,137 @@
-/*  Towhidul Islam
-    University Of Dhaka
-    Problem Name :
-    Algorithm Used :
-*/
-
-#include<cstdio>
-#include<iostream>
-#include<cstring>
-#include<cmath>
-#include<cstdlib>
-#include<cctype>
-#include<vector>
-#include<queue>
-#include<fstream>
-#include<sstream>
-#include<set>
-#include<climits>
-#include<map>
-#include<algorithm>
-#include<iomanip>
-#include<functional>
-
-typedef long long ll;
-
-#define pb              push_back
-#define mem(a, x)       memset(a, x, sizeof a)
-#define PI              acos(-1)
-#define all(a)          a.begin(), a.end()
-#define MAX             100010
-#define read(in)        freopen("in.txt", "r", stdin)
-#define write(out)      freopen("out.txt", "w", stdout)
-#define INF             10000000
-#define eps             1e-9
-#define arraysz(a)      sizeof (a)/sizeof(a[0])
-#define FORX(i, x, n)   for(int i = x; i < n; i++)
-#define FORN(i, n)      for(int i = 0; i < n; i++)
-#define FORD(i, x, n)   for(int i= n - 1; i >= x; i--)
-#define scan(n)         scanf("%d", &n)
-#define print(n)        printf("%d\n", n)
-#define tor             vector
-#define dbg(x)          cout<<#x<<" : "<<x<<endl
-#define pii             pair<int, int>
-
+#include <cstdio>
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <vector>
+#include <algorithm>
 using namespace std;
 
-/*
-template <class T> inline void debug( T x ){ cout << "x = " << x << endl; }
-template <class T1, class T2> inline void
-    debug( T1 x, T2 y ){ cout << "x = " << x << ", y = " << y << endl; }
-template <class T1, class T2, class T3> inline void
-    debug( T1 x, T2 y, T3 z ){
-        cout << "x = " << x << ", y = " << y << ", z = " << z << endl;
+typedef pair< int, int > pii;
+typedef pair< pii, int > edge;
+
+const int MAX = 128;
+const int INF = 0x7f7f7f7f;
+
+char grid[25][26];
+int n, hk, gk, lo, hi, num[25][25], d[25][25];
+int dr[4] = {-1, 0, 0, 1}, dc[4] = {0, -1, 1, 0};
+vector< edge > E;
+vector< int > G[MAX];
+bool visited[MAX];
+int Left[MAX], Right[MAX];
+ 
+bool dfs(int u) {
+    if(visited[u]) return false;
+    visited[u] = true;
+    int len = G[u].size(), i, v;
+    for(i=0; i<len; i++) {
+        v = G[u][i];
+        if(Right[v]==-1) {
+            Right[v] = u, Left[u] = v;
+            return true;
+        }
     }
-*/
-template <class T> inline T GCD( T a, T b ) { if( a < 0 ) return GCD( -a , b );
-    if( b < 0 ) return GCD( a, -b ); return ( b == 0 ) ? a : GCD( b, a%b ); }
-template <class T> inline T LCM( T a, T b ) { if( a < 0 ) return LCM( -a, b );
-    if( b < 0 ) return LCM( a, -b ); return a * ( b / GCD( a, b ) ); }
+    for(i=0; i<len; i++) {
+        v = G[u][i];
+        if(dfs(Right[v])) {
+            Right[v] = u, Left[u] = v;
+            return true;
+        }
+    }
+    return false;
+}
+ 
+int match(int n) {
+    int i, ret = 0;
+    bool done;
+    memset(Left, -1, sizeof Left);
+    memset(Right, -1, sizeof Right);
+    do {
+        done = true;
+        memset(visited, 0, sizeof visited);
+        for(i=1; i<=n; i++) {
+            if(Left[i]==-1 && dfs(i)) {
+                done = false;
+            }
+        }
+    } while(!done);
+    for(i=1; i<=n; i++) ret += (Left[i]!=-1);
+    return ret;
+}
 
-template <class T> inline T abso( T x ) { return x >= 0 ? x : -x; }
-template <class T> inline T mod( T n, T m ) { return ( n%m + m ) % m; }
+inline bool valid(int r, int c) {
+    return 0 <= r && r < n && 0 <= c && c < n;
+}
 
-int Set(int N, int pos) { return N = N | (1 << pos); }
-int reSet(int N, int pos) { return N = N & ~(1 << pos); }
-bool check(int N, int pos) { return (bool)(N & (1 << pos)); }
+void bfs(int r, int c, int gid) {
+    int i, r1, c1;
+    queue< int > Q;
+    Q.push(r), Q.push(c);
+    memset(d, -1, sizeof d);
+    d[r][c] = 0;
+    while(!Q.empty()) {
+        r = Q.front(); Q.pop();
+        c = Q.front(); Q.pop();
+        for(i = 0; i < 4; i++) {
+            r1 = r + dr[i];
+            c1 = c + dc[i];
+            if(valid(r1, c1) && grid[r1][c1] != '#' && d[r1][c1] == -1) {
+                d[r1][c1] = d[r][c] + 1;
+                if(grid[r1][c1] == 'H') {
+                    cout<<gid<<" "<<num[r1][c1]<<endl;
+                    E.push_back(edge(pii(gid, num[r1][c1]), (1+d[r1][c1])<<1));
+                    lo = min(lo, (1+d[r1][c1])<<1);
+                    hi = max(hi, (1+d[r1][c1])<<1);
+                }
+                Q.push(r1), Q.push(c1);
+            }
+        }
+    }
+}
 
-int main(){
-
-    cout<< (1 xor 1) <<" "<<(1 xor 2)<<endl;
+int main() {
+    freopen("in.txt", "r", stdin);
+    int test, cs, i, j;
+    scanf("%d", &test);
+    for(cs = 1; cs <= test; cs++) {
+        scanf("%d", &n);
+        hk = gk = 0;
+        lo = INF, hi = -INF;
+        for(i = 0; i < n; i++) {
+            scanf("%s", grid[i]);
+            for(j = 0; j < n; j++) {
+                if(grid[i][j] == 'H') num[i][j] = ++hk;
+                else if(grid[i][j] == 'G') num[i][j] = ++gk;
+            }
+        }
+        E.clear();
+        for(i = 0; i < n; i++) {
+            for(j = 0; j < n; j++) {
+                if(grid[i][j] == 'G') {
+                    bfs(i, j, num[i][j]);
+                }
+            }
+        }
+        for(i = 1; i <= gk; i++) G[i].clear();
+        for(i = 0; i < E.size(); i++)
+            if(E[i].second <= hi){
+                cout<<"high: "<<E[i].first.first<<" "<<E[i].first.second<<endl;
+                G[E[i].first.first].push_back(E[i].first.second);
+            }
+        if(match(gk) < hk) {
+            printf("Case %d: Vuter Dol Kupokat\n", cs);
+            continue;
+        }
+        while(lo < hi) {
+            j = (lo + hi) >> 1;
+            for(i = 1; i <= gk; i++) G[i].clear();
+            for(i = 0; i < E.size(); i++)
+                if(E[i].second <= j)
+                    G[E[i].first.first].push_back(E[i].first.second);
+            if(match(gk) == hk) hi = j;
+            else lo = j + 1;
+        }
+        printf("Case %d: %d\n", cs, hi);
+    }
     return 0;
 }
